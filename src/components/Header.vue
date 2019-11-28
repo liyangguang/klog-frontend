@@ -1,16 +1,28 @@
 <template lang="pug">
-header
+header(:class="{'-scrolled': isScrolled}")
   router-link.logo(to="/") KLog
   nav
-    ant-button(type="primary", ghost, @click="navigateTo('dashboard')") 教学管理入口
+    ant-button(type="primary", @click="navigateTo('dashboard')") 教学管理入口
     
 </template>
 
 <script>
-import AntButton from 'ant-design-vue/lib/button';
+import {Button as AntButton} from 'ant-design-vue';
+
+const SCROLL_THRESHOLD = 60;
 
 export default {
   components: {AntButton},
+  data(){
+    return {
+      isScrolled: false,
+    };
+  },
+  created() {
+    window.addEventListener('scroll', () => {
+      this.isScrolled = window.scrollY > SCROLL_THRESHOLD;
+    });
+  },
   methods: {
     navigateTo(path) {
       this.$router.push(path);
@@ -30,6 +42,12 @@ header {
   justify-content: space-between;
   z-index: var(--z-header);
   padding: 1em 2em;
+  transition: all var(--transition-fast);
+
+  &.-scrolled {
+    background: #fff;
+    box-shadow: 0 0 6px rgba(0,0,0,.5);
+  }
 }
 
 .logo {

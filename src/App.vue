@@ -12,8 +12,10 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="postcss" scoped>
+@import './variables.css';
+
 #app {
-  background: #EAF2F7;  
+  background: var(--background-gray);
 }
 </style>

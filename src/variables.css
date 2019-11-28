@@ -1,5 +1,8 @@
 :root {
-  --transition: 1s ease-in-out;
+  --background-gray: #EAF2F7;
+  --theme-primary: #1890ff;
+  --transition-slow: 1s ease-in-out;
+  --transition-fast: .3s ease-in-out;
 
   --z-header: 10;
 }

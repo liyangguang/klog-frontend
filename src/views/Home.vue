@@ -13,14 +13,14 @@ main
       li
         img(src="@/assets/speech-bubble.svg", alt="speech bubble icon")
         p 老师向家长们分享每个孩子的精彩片段
-    ant-button(type="primary", icon="download", size="large") 安卓应用市场
+    ant-button(ghost, type="primary", icon="download", size="large") 安卓应用市场
   .photos
     img(v-for="(photo, index) in photos", :style="{opacity: index === photoIndex ? 1 : 0}", :src="photo", alt="kids in a class stock photo")
   img.phone(src="@/assets/phone.png", alt="Phone frame")
 </template>
 
 <script>
-import AntButton from 'ant-design-vue/lib/button';
+import {Button as AntButton} from 'ant-design-vue';
 
 const SLIDE_INTERVAL = 5 * 1000;
 
@@ -53,7 +53,7 @@ main {
     content: '';
     position: absolute;
     top: 0;bottom: 0;left: 0;right: 0;
-    background: linear-gradient(to right, #EAF2F7 30%, rgba(255,255,255,.6) 90%);
+    background: linear-gradient(to right, var(--background-gray) 30%, rgba(255,255,255,.6) 90%);
     pointer-events: none;
   }
 }
@@ -108,7 +108,7 @@ main {
     top: 0;left: 0;right: 0;bottom: 0;
     width: 100%;
     height: 100%;
-    transition: opacity var(--transition);
+    transition: opacity var(--transition-slow);
   }
 }
 
@@ -119,12 +119,5 @@ main {
   margin: 15vh auto 2em;
   position: relative;
   z-index: 1;
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity var(--transition);
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
 }
 </style>
