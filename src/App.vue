@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import myHeader from './components/Header.vue';
+import myHeader from './desktopComponents/Header.vue';
 
 export default {
   components: {myHeader},
@@ -17,5 +17,6 @@ export default {
 
 #app {
   background: var(--background-gray);
+  min-height: 100vh;
 }
 </style>

@@ -97,7 +97,7 @@ p {
 }
 
 .add-button {
-  margin: 0 auto;
+  margin: 0 auto 3em;
   display: block;
   transform: scale(1.5) translateY(40%);
 }

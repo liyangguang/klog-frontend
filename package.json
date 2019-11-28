@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "npm run serve",
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "start": "npm run dev-fe",
+    "dev-fe": "vue-cli-service serve",
+    "dev-be": "npm run build && PORT=3000 ENV=dev nodemon server.js",
+    "build": "vue-cli-service build",
+    "prod": "npm run build && forever start server.js",
+    "stop": "forever stop server.js"
   },
   "dependencies": {
     "ant-design-vue": "^1.4.7",
