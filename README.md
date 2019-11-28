@@ -1,19 +1,24 @@
 # klog
 
+A vue web app + a basic node server.
+
 ## Project setup
 ```
-yarn install
+npm install
 ```
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
-
-### Compiles and minifies for production
-```
-yarn build
+### Local dev
+```bash
+npm run dev-fe  # Auto reload vue code
+npm run dev-be  # Auto reload node server
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Compile and prod
+
+```bash
+npm run prod  # compile and run server using forever.js
+```
+
+```bash
+npm run stop  # stop forever.js
+```
