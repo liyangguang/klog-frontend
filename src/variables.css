@@ -1,0 +1,5 @@
+:root {
+  --transition: 1s ease-in-out;
+
+  --z-header: 10;
+}
