@@ -16,8 +16,7 @@ main
           p 老师向家长们分享每个孩子的精彩片段
       ant-button(ghost, type="primary", icon="download", size="large") 安卓应用市场
     img.right(src="@/assets/phone.png", alt="Phone frame")
-  .background-photos
-    img(v-for="(photo, index) in photos", :style="{opacity: index === photoIndex ? 1 : 0}", :src="photo", alt="kids in a class stock photo")
+  .background-photo(v-for="(photo, index) in photos", :style="{opacity: index === photoIndex ? 1 : 0, 'background-image': `url(${photo})`}")
 </template>
 
 <script>
@@ -47,6 +46,10 @@ export default {
 :root {
   --z-content: 1;
   --z-bg-photos: 0;
+}
+
+main {
+  position: relative;
 }
 
 .content {
@@ -98,21 +101,35 @@ export default {
   margin: auto;
 }
 
-.background-photos {
-  & > img {
-    object-fit: cover;
-    position: absolute;
-    top: 0;left: 0;right: 0;bottom: 0;
-    width: 100%;
-    height: 100%;
-    transition: opacity var(--transition-slow);
-    z-index: var(--z-bg-photos);
-  }
+.background-photo {
+  position: absolute;
+  top: 0;left: 0;right: 0;bottom: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: right center;
+  transition: opacity var(--transition-slow);
+  z-index: var(--z-bg-photos);
 }
 
 @media screen and (max-width: 800px) {
   .content {
     display: block;
+    font-size: 0.8em;
+  }
+
+  .left {
+    padding: 6em 2em 2em;
+    text-align: center;
+  }
+
+  .features {
+    display: block;
+
+    & > li {
+      margin-bottom: 2em;
+    }
   }
 
   .right {
