@@ -1,14 +1,19 @@
 <template lang="pug">
 #app
-  my-header
+  my-header(v-if="!isEmbed")
   router-view
 </template>
 
 <script>
-import myHeader from './desktopComponents/Header.vue';
+import myHeader from './components/Header.vue';
 
 export default {
   components: {myHeader},
+  data() {
+    return {
+      isEmbed: this.$route.path.includes('_embed'),
+    };
+  },
 }
 </script>
 
