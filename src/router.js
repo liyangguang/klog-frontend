@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Landing from './desktopComponents/Landing.vue'
-import Dashboard from './desktopComponents/Dashboard.vue'
+import Landing from './components/Landing.vue'
+import Dashboard from './components/Dashboard.vue'
 
 Vue.use(VueRouter)
 
