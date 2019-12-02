@@ -8,7 +8,7 @@
     "dev-be": "npm run build && PORT=3000 ENV=dev nodemon server/index.js",
     "build": "vue-cli-service build",
     "prod": "npm run build && forever start server/index.js",
-    "stop": "forever stop server/index.js"
+    "stop": "forever stopall"
   },
   "dependencies": {
     "ant-design-vue": "^1.4.7",
