@@ -8,7 +8,7 @@ main
       p.more 课程信息: {{item.more}}
       p.student 学生: {{item.students}}
         ant-button.student-button(size="small") 管理
-    ant-card(title="添加新课程")
+    ant-card(title="添加新课程", :bodyStyle="{'min-height': '10em'}")
       ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addNew", aria-label="添加")
   ant-modal(:title="modalContent.id ? '编辑课程' : '添加新课程'", :visible="isModalVisible", @ok="dialogOk", @cancel="isModalVisible = false")
     ant-form(formLayout="horizontal")
@@ -25,6 +25,7 @@ import {
   Form as AntForm,
   Input as AntInput,
 } from 'ant-design-vue';
+import {callApi} from '../api.js';
 
 export default {
   components: {AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput},
@@ -34,6 +35,11 @@ export default {
       modalContent: {},
       classes: MOCK_CLASSES,
     };
+  },
+  created() {
+    if (!this.$store.state.currentUserPid) {
+      this.$router.push('/signin');
+    }
   },
   methods: {
     addNew() {
@@ -59,10 +65,11 @@ export default {
           resolve(++MOCK_ID);
         }, 1000);
       });
-    }
+    },
   },
 }
 
+// TODO(yangguang): Change to real API
 const MOCK_CLASSES = [
   {id: 1, name: '中国历史兴趣班', teacher: '袁腾飞', more: '2019 8 月开课', students: 20},
   {id: 2, name: '流行音乐入门', teacher: '高晓松', more: '2019', students: 15},
@@ -97,7 +104,7 @@ p {
 }
 
 .add-button {
-  margin: 0 auto 3em;
+  margin: 0 auto;
   display: block;
   transform: scale(1.5) translateY(40%);
 }
