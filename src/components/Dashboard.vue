@@ -4,18 +4,22 @@ main
   .grid
     ant-card(v-for="(item, _key) in courses", :key="_key", :title="item.course_name")
       ant-button(slot="extra", shape="circle", icon="edit", @click="edit(item)", aria-label="编辑课程")
-      p.teacher 老师: {{item.teacher_pid}}
-      p.teacher 助教: {{item.assistant_pid}}
+      p.teacher 老师: {{_getTeacher(item.teacher_pid).name || '(未找到)'}}
+      p.teacher 助教: {{_getTeacher(item.assistant_pid).name || '(未找到)'}}
       p.more 课程信息: {{item.course_intro}}
         ant-button.student-button(size="small") 管理
     ant-card(title="添加新课程", :bodyStyle="{'min-height': '10em'}")
       ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addNew", aria-label="添加")
   ant-modal(:title="modalContent.id ? '编辑课程' : '添加新课程'", :visible="isModalVisible", @ok="dialogOk", @cancel="isModalVisible = false")
     ant-form(formLayout="horizontal")
-      ant-form-item(label="课程名称", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.course_name")
-      ant-form-item(label="老师姓名", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.teacher_pid")
-      ant-form-item(label="助教姓名", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.assistant_pid")
-      ant-form-item(label="课程信息", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.course_intro")
+      ant-form-item(label="名称", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.course_name")
+      ant-form-item(label="老师", :label-col="{span: 4}", :wrapper-col="{span: 20}")
+        ant-select(v-model="modalContent.teacher_pid")
+          ant-select-option(v-for="(teacher, _key) in teacherList", :key="_key", :value="teacher.pid") {{teacher.teacher_name}}
+      ant-form-item(label="助教", :label-col="{span: 4}", :wrapper-col="{span: 20}")
+        ant-select(v-model="modalContent.assistant_pid")
+          ant-select-option(v-for="(teacher, _key) in teacherList", :key="_key", :value="teacher.pid") {{teacher.teacher_name}}
+      ant-form-item(label="介绍", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.course_intro")
       p {{dialogMessage}}
 </template>
 
@@ -26,34 +30,39 @@ import {
   Modal as AntModal,
   Form as AntForm,
   Input as AntInput,
+  Select as AntSelect,
 } from 'ant-design-vue';
 import {callApi} from '../api.js';
 
 export default {
-  components: {AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput},
+  components: {AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput, AntSelect, AntSelectOption: AntSelect.Option},
   data() {
     return {
       courses: [],
       isModalVisible: false,
       modalContent: {},
       dialogMessage: '',
+      teacherList: [],
     };
   },
   created() {
-    if (!this.$store.state.currentUserPid) {
-      this.$router.push('/signin');
-    }
-
     this._loadCourses();
+    this._loadTeacherList();
   },
   methods: {
+    _loadTeacherList() {
+      return callApi('config/teacher').then((teachers) => {
+        this.teacherList = teachers;
+      }).catch((error) => {
+        this.teacherList = [{teacher_name: '获取教师列表失败'}];
+      });
+    },
     _loadCourses() {
-      return callApi('config/course', {pid: 'all'}).then(console.log);
-      // return callApi('config/course', {'teacher_pid': this.$store.state.currentUserPid}).then((courses) => {
-      //   this.courses = courses;
-      // }).catch((error) => {
-      //   this.dialogMessage = error;
-      // });
+      return callApi('config/course').then((courses) => {
+        this.courses = courses.filter((course) => course.teacher_pid === this.$store.state.currentUserPid || course.assistant_pid === this.$store.state.currentUserPid);
+      }).catch((error) => {
+        this.dialogMessage = error;
+      });
     },
     addNew() {
       this.modalContent = {};
@@ -66,12 +75,15 @@ export default {
     dialogOk() {
       if (!this.modalContent.course_uid) {
         this.modalContent.course_uid = this.modalContent.course_name.toLowerCase().replace(/\W+/, '-');
-        this.courses.push(this.modalContent);
       }
       return this._saveItem(this.modalContent).then((newPin) => {
         this.modalContent.pin = newPin;
+        this.courses.push(this.modalContent);
         this.isModalVisible = false;
       });
+    },
+    _getTeacher(pid) {
+      return this.teacherList.filter((teacher) => teacher.pid === pid)[0] || {};
     },
     _saveItem(item) {
       return callApi('config/course', item, item.pid ? 'PUT' : 'POST').catch((error) => {

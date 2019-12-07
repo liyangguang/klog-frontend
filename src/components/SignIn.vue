@@ -62,7 +62,7 @@ export default {
         teacher_key: this.teacher_key,
       };
       callApi('workflow/teacher/login', payload, 'POST').then((teacher) => {
-        this.$store.commit('setCurrentUserPid', {pid: teacher.pid, save: this.doSaveInCookie});
+        this.$store.commit('setCurrentUser', {user: teacher, save: this.doSaveInCookie});
         this.$router.push('/dashboard');
       }).catch((error) => {
         this.message = error;
@@ -81,9 +81,8 @@ export default {
         email: this.email,
         institute_pid: this.institute_pid,
       };
-      callApi('config/teacher', payload, 'POST').then((pid) => {
-        this.$store.commit('setCurrentUserPid', {pid, save: this.doSaveInCookie});
-        this.$router.push('/dashboard');
+      callApi('config/teacher', payload, 'POST').then(() => {
+        this.$router.go();
       }).catch((error) => {
         this.message = error;
       });

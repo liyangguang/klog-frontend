@@ -1,23 +1,19 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    currentUserPid: Cookies.get('klog-user-pid'),
+    currentUser: null,
   },
   mutations: {
-    setCurrentUserPid(state, payload) {
-      state.currentUserPid = payload.pid;
+    setCurrentUser(state, payload) {
+      state.currentUser = payload.user;
       if (payload.save) {
-        Cookies.set('klog-user-pid', payload.pid, {expires: 30});
+        Cookies.set('klog-user-pid', payload.user.pid, {expires: 30});
       }
     },
   },
-  actions: {
-  },
-  modules: {
-  }
-})
+});
