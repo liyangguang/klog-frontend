@@ -2,19 +2,21 @@
 main
   h1 教学管理
   .grid
-    ant-card(v-for="(item, key) in classes", :key="key", :title="item.name")
+    ant-card(v-for="(item, _key) in courses", :key="_key", :title="item.course_name")
       ant-button(slot="extra", shape="circle", icon="edit", @click="edit(item)", aria-label="编辑课程")
-      p.teacher 老师: {{item.teacher}}
-      p.more 课程信息: {{item.more}}
-      p.student 学生: {{item.students}}
+      p.teacher 老师: {{item.teacher_pid}}
+      p.teacher 助教: {{item.assistant_pid}}
+      p.more 课程信息: {{item.course_intro}}
         ant-button.student-button(size="small") 管理
     ant-card(title="添加新课程", :bodyStyle="{'min-height': '10em'}")
       ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addNew", aria-label="添加")
   ant-modal(:title="modalContent.id ? '编辑课程' : '添加新课程'", :visible="isModalVisible", @ok="dialogOk", @cancel="isModalVisible = false")
     ant-form(formLayout="horizontal")
-      ant-form-item(label="课程名称", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.name")
-      ant-form-item(label="老师姓名", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.teacher")
-      ant-form-item(label="课程信息", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.more")
+      ant-form-item(label="课程名称", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.course_name")
+      ant-form-item(label="老师姓名", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.teacher_pid")
+      ant-form-item(label="助教姓名", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.assistant_pid")
+      ant-form-item(label="课程信息", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.course_intro")
+      p {{dialogMessage}}
 </template>
 
 <script>
@@ -31,17 +33,28 @@ export default {
   components: {AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput},
   data() {
     return {
+      courses: [],
       isModalVisible: false,
       modalContent: {},
-      classes: MOCK_CLASSES,
+      dialogMessage: '',
     };
   },
   created() {
     if (!this.$store.state.currentUserPid) {
       this.$router.push('/signin');
     }
+
+    this._loadCourses();
   },
   methods: {
+    _loadCourses() {
+      return callApi('config/course', {pid: 'all'}).then(console.log);
+      // return callApi('config/course', {'teacher_pid': this.$store.state.currentUserPid}).then((courses) => {
+      //   this.courses = courses;
+      // }).catch((error) => {
+      //   this.dialogMessage = error;
+      // });
+    },
     addNew() {
       this.modalContent = {};
       this.isModalVisible = true;
@@ -51,35 +64,23 @@ export default {
       this.isModalVisible = true;
     },
     dialogOk() {
-      return this._saveItem(this.modalContent).then((newId) => {
-        if (!this.modalContent.id) {
-          this.modalContent.id = newId;
-          this.classes.push(this.modalContent);
-        }
+      if (!this.modalContent.course_uid) {
+        this.modalContent.course_uid = this.modalContent.course_name.toLowerCase().replace(/\W+/, '-');
+        this.courses.push(this.modalContent);
+      }
+      return this._saveItem(this.modalContent).then((newPin) => {
+        this.modalContent.pin = newPin;
         this.isModalVisible = false;
       });
     },
     _saveItem(item) {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(++MOCK_ID);
-        }, 1000);
+      return callApi('config/course', item, item.pid ? 'PUT' : 'POST').catch((error) => {
+        this.dialogMessage = error;
       });
     },
   },
 }
 
-// TODO(yangguang): Change to real API
-const MOCK_CLASSES = [
-  {id: 1, name: '中国历史兴趣班', teacher: '袁腾飞', more: '2019 8 月开课', students: 20},
-  {id: 2, name: '流行音乐入门', teacher: '高晓松', more: '2019', students: 15},
-  {id: 3, name: '篮球 6-8 岁班', teacher: '林书豪', more: '2019 冬季班', students: 8},
-  {id: 4, name: '中国历史兴趣班', teacher: '袁腾飞', more: '2019 8 月开课', students: 12},
-  {id: 5, name: '流行音乐入门', teacher: '高晓松', more: '2019', students: 22},
-  {id: 6, name: '篮球 6-8 岁班', teacher: '林书豪', more: '2019 冬季班', students: 16},
-];
-
-let MOCK_ID = MOCK_CLASSES.length;
 </script>
 
 <style lang="postcss" scoped>

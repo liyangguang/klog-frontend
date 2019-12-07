@@ -2,8 +2,7 @@
 header(:class="{'-scrolled': isScrolled}")
   router-link.logo(to="/") KLog
   nav
-    ant-button(type="primary", @click="navigateTo('dashboard')") 教学管理入口
-    
+    ant-button(v-for="(nav, _key) in navs", :key="_key", type="primary", @click="navigateTo(nav.path)") {{nav.title}}
 </template>
 
 <script>
@@ -13,6 +12,7 @@ const SCROLL_THRESHOLD = 60;
 
 export default {
   components: {AntButton},
+  props: ['navs'],
   data(){
     return {
       isScrolled: false,
