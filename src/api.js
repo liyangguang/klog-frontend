@@ -1,7 +1,7 @@
 import {sha256} from 'js-sha256';
 
 const ROOT = 'https://klogserver.westus2.cloudapp.azure.com/api/0/';
-const ALL_PARAM = 'pid=all';
+export const ALL_VALUE = 'all';
 
 export function callApi(path, payload = {}, method) {
   let option = {};
@@ -12,18 +12,17 @@ export function callApi(path, payload = {}, method) {
     }
     option = {method, body: JSON.stringify(payload)};
   } else {
-    params = '?';
-    Object.entries(payload).forEach(([key, value]) => {params += `${key}=${value}`;});
-    if (params === '?') {
-      params += ALL_PARAM;
+    if (!payload.pid) {
+      payload.pid = ALL_VALUE;
     }
+    params = Object.entries(payload).map(([key, value]) => `${key}=${value}`).join('&');
   }
 
-  return fetch(`${ROOT}${path}${params}`, option).then((res) => {
+  return fetch(`${ROOT}${path}?${params}`, option).then((res) => {
     if (res.ok) {
       return res.json().then((res) => res.payload);
     } else {
-      return res.json().then((res) => {console.error(new Error(res.message)); throw res.message});
+      return res.json().then((res) => {throw new Error(res.message);});
     }
   });
 }

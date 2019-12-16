@@ -1,7 +1,6 @@
 <template lang="pug">
 main
-  h1 教学管理
-  p {{pageMessage}}
+  h1 学生管理
   .grid
     ant-card(v-for="(item, _key) in courses", :key="_key", :title="item.course_name")
       ant-button(slot="extra", shape="circle", icon="edit", @click="edit(item)", aria-label="编辑课程")
@@ -9,7 +8,7 @@ main
       p.teacher 助教: {{getTeacherName(item.assistant_pid)}}
       p.more 课程信息: {{item.course_intro}}
       ant-button(size="small") 管理学生
-    ant-card(title="添加新课程", :bodyStyle="{'min-height': '10em', 'text-align': 'center'}")
+    ant-card(title="添加新课程", :bodyStyle="{'min-height': '10em'}")
       ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addNew", aria-label="添加")
   ant-modal(:title="modalContent.pid ? '编辑课程' : '添加新课程'", :visible="isModalVisible", @ok="dialogOk", @cancel="isModalVisible = false")
     ant-form(formLayout="horizontal")
@@ -33,48 +32,33 @@ import {
   Input as AntInput,
   Select as AntSelect,
 } from 'ant-design-vue';
-import {sha256} from 'js-sha256';
-import {callApi} from '../api.js';
-
-const NO_TEACHER_PID = '000000000000000000000000';
+import {callApi, ALL_VALUE} from '../api.js';
 
 export default {
   components: {AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput, AntSelect, AntSelectOption: AntSelect.Option},
   data() {
     return {
-      courses: [],
+      coursePid: this.$route.params.pid,
+      students: [],
       isModalVisible: false,
       modalContent: {},
       dialogMessage: '',
       pageMessage: '',
-      teacherList: [],
     };
   },
   created() {
-    this._loadCourses();
-    this._loadTeacherList();
+    this._loadStudents();
   },
   methods: {
-    _loadTeacherList() {
-      const filter = {fkey: 'institute_pid', fid: this.$store.state.currentUser.institute_pid};
-      return callApi('config/teacher', filter).then((teachers) => {
-        this.teacherList = teachers;
+    _loadStudents() {
+      return callApi('config/reference/student_course', {student_pid: ALL_VALUE, course_pid: this.coursePid}).then((pairs) => {
+        this.students = pairs;
       }).catch((error) => {
-        console.error(error);
-        this.teacherList = [{pid: null, teacher_name: '获取教师列表失败'}];
-      });
-    },
-    _loadCourses() {
-      const filter = {fkey: 'teacher_pid', fid: this.$store.state.currentUser.pid};
-      return callApi('config/course', filter).then((courses) => {
-        this.courses = courses.filter((course) => course.teacher_pid === this.$store.state.currentUser.pid || course.assistant_pid === this.$store.state.currentUser.pid);
-      }).catch((error) => {
-        console.error(error);
-        this.pageMessage = error.message;
+        this.pageMessage = error;
       });
     },
     addNew() {
-      this.modalContent = this._getDefaultNewCourseFields();
+      this.modalContent = {institute_pid: this.$store.state.currentUser.institute_pid};
       this.isModalVisible = true;
     },
     edit(item) {
@@ -83,35 +67,27 @@ export default {
     },
     dialogOk() {
       const isNew = !this.modalContent.pid;
-      // TODO: If we can remove it from the database, remove this.
-      if (isNew) {
-        this.modalContent.course_uid = sha256(this.modalContent.course_name);
-      }
-      callApi('config/course', this.modalContent, isNew ? 'POST' : 'PUT').then((newPid) => {
+      return this._saveItem(this.modalContent).then((newPid) => {
+        this.modalContent.pid = newPid;
         if (isNew) {
-          this.modalContent.pid = newPid;
           this.courses.push(this.modalContent);
         }
         this.isModalVisible = false;
-      }).catch((error) => {
-        console.error(error);
-        this.dialogMessage = error.message;
       });
     },
-    getTeacherName(pid) {
-      if (!pid || pid === NO_TEACHER_PID) return '(无)';
+    getStudentName(pid) {
       if (!this.teacherList.length) return '(载入中)';
 
       const teacher = this.teacherList.filter((teacher) => teacher.pid === pid)[0];
-      if (!teacher) throw new Error(`No teacher found matching pid ${pid}`);
+      if (!teacher) throw new Error(`No teacher found matching pin ${pid}`);
       return teacher.teacher_name;
     },
-    _getDefaultNewCourseFields() {
-      return {
-        teacher_pid: this.$store.state.currentUser.pid,
-        institute_pid: this.$store.state.currentUser.institute_pid,
-        course_targets: [],  // TODO: add this in the UI
-      }
+    _saveItem(item) {
+      return callApi('config/course', item, item.pid ? 'PUT' : 'POST').then((res) => {
+        console.log(res)
+      }).catch((error) => {
+        this.dialogMessage = error;
+      });
     },
   },
 }
@@ -140,6 +116,8 @@ p {
 }
 
 .add-button {
+  margin: 0 auto;
+  display: block;
   transform: scale(1.5) translateY(40%);
 }
 
