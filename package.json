@@ -5,9 +5,9 @@
   "scripts": {
     "start": "npm run dev-fe",
     "dev-fe": "vue-cli-service serve",
-    "dev-be": "npm run build && PORT=3000 ENV=dev nodemon server/index.js",
+    "dev-be": "PORT=3000 ENV=dev nodemon server/index.js",
     "build": "vue-cli-service build",
-    "prod": "npm run build && forever start server/index.js",
+    "prod": "forever start server/index.js",
     "stop": "forever stopall"
   },
   "dependencies": {
