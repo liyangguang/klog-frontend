@@ -63,7 +63,7 @@ export default {
       };
       callApi('workflow/teacher/login', payload, 'POST').then((teacher) => {
         this.$store.commit('setCurrentUser', {user: teacher, save: this.doSaveInCookie});
-        this.$router.push('/dashboard');
+        this.$router.push('/courses');
       }).catch((error) => {
         this.message = error;
       });
