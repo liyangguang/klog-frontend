@@ -1,5 +1,6 @@
 <template lang="pug">
 form(:enctype="REQUIRED_FILED_FOR_MULTIPART", ref="formEl")
+  p This is a page to test the upload feature, not a real page in the app.
   p {{message}}
   input(type='file', :name="FORM_FILED_NAME", @change="file = $event.target.files[0]")
   ant-button(@click="submit", :disabled="!file || isDisabled") Upload Image

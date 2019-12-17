@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Landing from './components/Landing.vue';
-import Dashboard from './components/Dashboard.vue';
+import Courses from './components/Courses.vue';
+import Students from './components/Students.vue';
 import Signin from './components/SignIn.vue';
 import UploadDemo from './embededViews/UploadDemo.vue';
 import store from './store.js'
@@ -26,8 +27,8 @@ const routes = [
   // Note: `_api` is reserved for the node server, like `/_api/upload`
   {path: '/', component: Landing},
   {path: '/signin', component: Signin},
-  {path: '/dashboard', component: Dashboard, beforeEnter: routeGuard},
-  {path: '/course/:pid', component: Dashboard, beforeEnter: routeGuard},
+  {path: '/courses', component: Courses, beforeEnter: routeGuard},
+  {path: '/students/:coursePid', component: Students, beforeEnter: routeGuard},
   {path: '/_embed/upload', component: UploadDemo},
   {path: '*', redirect: '/'},
 ];

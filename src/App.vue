@@ -7,7 +7,7 @@
 <script>
 import myHeader from './components/Header.vue';
 
-const DASHBOARD_NAV = [{path: 'dashboard', title: '教学管理入口'}];
+const DASHBOARD_NAV = [{path: 'courses', title: '课程管理入口'}];
 
 export default {
   components: {myHeader},

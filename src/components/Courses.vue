@@ -1,17 +1,17 @@
 <template lang="pug">
 main
-  h1 教学管理
+  h1 课程管理
   p {{pageMessage}}
   .grid
     ant-card(v-for="(item, _key) in courses", :key="_key", :title="item.course_name")
-      ant-button(slot="extra", shape="circle", icon="edit", @click="edit(item)", aria-label="编辑课程")
+      ant-button(slot="extra", shape="circle", icon="edit", @click="editButton(item)", aria-label="编辑课程")
       p.teacher 老师: {{getTeacherName(item.teacher_pid)}}
       p.teacher 助教: {{getTeacherName(item.assistant_pid)}}
       p.more 课程信息: {{item.course_intro}}
-      ant-button(size="small") 管理学生
+      ant-button(@click="openStudents(item.pid)", size="small") 管理学生 ({{item.studentCount}})
     ant-card(title="添加新课程", :bodyStyle="{'min-height': '10em', 'text-align': 'center'}")
-      ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addNew", aria-label="添加")
-  ant-modal(:title="modalContent.pid ? '编辑课程' : '添加新课程'", :visible="isModalVisible", @ok="dialogOk", @cancel="isModalVisible = false")
+      ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addButton", aria-label="添加")
+  ant-modal(:title="modalContent.pid ? '编辑课程' : '添加新课程'", :visible="isModalVisible", @ok="modalOk", @cancel="isModalVisible = false")
     ant-form(formLayout="horizontal")
       ant-form-item(label="名称", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.course_name")
       ant-form-item(label="老师", :label-col="{span: 4}", :wrapper-col="{span: 20}")
@@ -21,7 +21,7 @@ main
         ant-select(v-model="modalContent.assistant_pid")
           ant-select-option(v-for="(teacher, _key) in teacherList", :key="_key", :value="teacher.pid") {{teacher.teacher_name}}
       ant-form-item(label="介绍", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.course_intro")
-      p {{dialogMessage}}
+      p {{modalMessage}}
 </template>
 
 <script>
@@ -45,7 +45,7 @@ export default {
       courses: [],
       isModalVisible: false,
       modalContent: {},
-      dialogMessage: '',
+      modalMessage: '',
       pageMessage: '',
       teacherList: [],
     };
@@ -68,20 +68,31 @@ export default {
       const filter = {fkey: 'teacher_pid', fid: this.$store.state.currentUser.pid};
       return callApi('config/course', filter).then((courses) => {
         this.courses = courses.filter((course) => course.teacher_pid === this.$store.state.currentUser.pid || course.assistant_pid === this.$store.state.currentUser.pid);
+        this.courses.forEach((course) => {
+          this._loadCourseStudentsRefs(course);
+        });
       }).catch((error) => {
         console.error(error);
-        this.pageMessage = error.message;
+        this.pageMessage = '获取课程列表失败. ' + error.message;
       });
     },
-    addNew() {
+    _loadCourseStudentsRefs(course) {
+      return callApi('config/reference/student_course', {student_pid: 'all', course_pid: course.pid}).then((refs) => {
+        this.$set(course, 'studentCount', refs.length);
+      }).catch((error) => {
+        console.error(error);
+        this.$set(course, 'studentCount', '(获取学生人数失败)');
+      });
+    },
+    addButton() {
       this.modalContent = this._getDefaultNewCourseFields();
       this.isModalVisible = true;
     },
-    edit(item) {
+    editButton(item) {
       this.modalContent = item;
       this.isModalVisible = true;
     },
-    dialogOk() {
+    modalOk() {
       const isNew = !this.modalContent.pid;
       // TODO: If we can remove it from the database, remove this.
       if (isNew) {
@@ -95,7 +106,7 @@ export default {
         this.isModalVisible = false;
       }).catch((error) => {
         console.error(error);
-        this.dialogMessage = error.message;
+        this.modalMessage = error.message;
       });
     },
     getTeacherName(pid) {
@@ -112,6 +123,9 @@ export default {
         institute_pid: this.$store.state.currentUser.institute_pid,
         course_targets: [],  // TODO: add this in the UI
       }
+    },
+    openStudents(courseId) {
+      this.$router.push(`/students/${courseId}`);
     },
   },
 }
