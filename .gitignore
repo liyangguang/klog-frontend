@@ -1,6 +1,8 @@
 .DS_Store
 node_modules
-/dist
+
+# The server often hangs when building vue. thus checking in /dist too.
+# /dist
 
 # env files
 .env
