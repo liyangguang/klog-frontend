@@ -96,7 +96,7 @@ export default {
       const isNew = !this.modalContent.pid;
       // TODO: If we can remove it from the database, remove this.
       if (isNew) {
-        this.modalContent.course_uid = sha256(this.modalContent.course_name);
+        this.modalContent.course_uid = 'uid' + sha256(this.modalContent.course_name + (new Date()).toString());
       }
       callApi('config/course', this.modalContent, isNew ? 'POST' : 'PUT').then((newPid) => {
         if (isNew) {
