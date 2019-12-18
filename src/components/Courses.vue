@@ -34,10 +34,10 @@ import {
   Select as AntSelect,
 } from 'ant-design-vue';
 import {callApi} from '../api.js';
-
-const NO_TEACHER_PID = '000000000000000000000000';
+import {teacherMixin} from '../mixins.js';
 
 export default {
+  mixins: [teacherMixin],
   components: {AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput, AntSelect, AntSelectOption: AntSelect.Option},
   data() {
     return {
@@ -46,28 +46,17 @@ export default {
       modalContent: {},
       modalMessage: '',
       pageMessage: '',
-      teacherList: [],
     };
   },
   created() {
     this._loadCourses();
-    this._loadTeacherList();
   },
   methods: {
-    async _loadTeacherList() {
-      const filter = {fkey: 'institute_pid', fid: this.$store.state.currentUser.institute_pid};
-      try {
-        this.teacherList = await callApi('config/teacher', filter);
-      } catch(error) {
-        console.error(error);
-        this.teacherList = [{pid: null, teacher_name: '获取教师列表失败'}];
-      };
-    },
     async _loadCourses() {
       try {
         // TODO(yangguang): remove the .filter() once the backend filter works
-        const filter = {fkey: 'teacher_pid', fid: this.$store.state.currentUser.pid};
-        this.courses = (await callApi('config/course', filter)).filter((course) => [course.teacher_pid, course.assistant_pid].includes(this.$store.state.currentUser.pid));
+        // const filter = {fkey: 'teacher_pid', fid: this.$store.state.currentUser.pid};
+        this.courses = (await callApi('config/course')).filter((course) => [course.teacher_pid, course.assistant_pid].includes(this.$store.state.currentUser.pid));
         this.courses.forEach((course) => {
           this._loadCourseStudentsRefs(course);
         });
@@ -85,7 +74,11 @@ export default {
       };
     },
     addButton() {
-      this.modalContent = this._getDefaultNewCourseFields();
+      this.modalContent = {
+        teacher_pid: this.$store.state.currentUser.pid,
+        institute_pid: this.$store.state.currentUser.institute_pid,
+        course_targets: [],  // TODO: add this in the UI
+      };
       this.isModalVisible = true;
     },
     editButton(item) {
@@ -94,7 +87,7 @@ export default {
     },
     async modalOk() {
       const isNew = !this.modalContent.pid;
-      // TODO: If we can remove it from the database, remove this.
+      // TODO: If we can do it in the backend, remove this.
       if (isNew) {
         this.modalContent.course_uid = 'uid-' + (new Date()).getTime();
       }
@@ -109,21 +102,6 @@ export default {
         console.error(error);
         this.modalMessage = error.message;
       };
-    },
-    getTeacherName(pid) {
-      if (!pid || pid === NO_TEACHER_PID) return '(无)';
-      if (!this.teacherList.length) return '(载入中)';
-
-      const teacher = this.teacherList.filter((teacher) => teacher.pid === pid)[0];
-      if (!teacher) throw new Error(`No teacher found matching pid ${pid}`);
-      return teacher.teacher_name;
-    },
-    _getDefaultNewCourseFields() {
-      return {
-        teacher_pid: this.$store.state.currentUser.pid,
-        institute_pid: this.$store.state.currentUser.institute_pid,
-        course_targets: [],  // TODO: add this in the UI
-      }
     },
     openStudents(courseId) {
       this.$router.push(`/students/${courseId}`);

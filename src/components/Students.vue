@@ -8,7 +8,7 @@ main
   .grid
     ant-card(v-for="(item, _key) in currentCourseStudentRefs", :key="_key")
       p {{getStudentName(item.student_pid)}}
-    ant-card(title="添加学生", :bodyStyle="{'min-height': '10em', 'text-align': 'center'}")
+    ant-card(:bodyStyle="{'min-height': '10em', 'text-align': 'center'}")
       ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addButton", aria-label="添加")
   ant-modal(title="添加学生", :visible="isModalVisible", @ok="modalOk", @cancel="isModalVisible = false", okText="确认", cancelText="取消")
     ant-form(formLayout="horizontal")
@@ -32,11 +32,12 @@ import {
 } from 'ant-design-vue';
 import {sha256} from 'js-sha256';
 import {callApi} from '../api.js';
+import {teacherMixin, studentMixin} from '../mixins.js';
 
-const NO_USER_PID = '000000000000000000000000';
 const NEW_STUDENT_VALUE = 'CREATE_NEW';
 
 export default {
+  mixins: [teacherMixin, studentMixin],
   components: {AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput, AntSelect, AntSelectOption: AntSelect.Option},
   data() {
     return {
@@ -46,8 +47,6 @@ export default {
       modalMessage: '',
       pageMessage: '',
       currentCourseStudentRefs: [],
-      teacherList: [],
-      studentList: [],
       NEW_STUDENT_VALUE: NEW_STUDENT_VALUE,
     };
   },
@@ -60,8 +59,6 @@ export default {
   created() {
     this._loadCourse();  // For course info
     this._loadCourseStudentsRefs();  // For student list
-    this._loadAllStudents();  // For getting student name
-    this._loadTeacherList();  // For getting teacher name
   },
   methods: {
     async _loadCourse() {
@@ -78,23 +75,6 @@ export default {
       } catch(error) {
         console.error(error);
         this.pageMessage = '获取学生列表失败. ' + error.message;
-      };
-    },
-    async _loadAllStudents() {
-      try {
-        this.studentList = await callApi('config/student');
-      } catch(error) {
-        console.error(error);
-        this.studentList = [{student_name: '获取学生列表失败'}];
-      };
-    },
-    async _loadTeacherList() {
-      const filter = {fkey: 'institute_pid', fid: this.$store.state.currentUser.institute_pid};
-      try {
-        this.teacherList = await callApi('config/teacher', filter);
-      } catch(error) {
-        console.error(error);
-        this.pageMessage = '获取教师列表失败. ' + error.message;
       };
     },
     addButton() {
@@ -125,22 +105,6 @@ export default {
         console.error(error);
         this.modalMessage = '添加学生失败. ' + error.message;
       };
-    },
-    getTeacherName(pid) {
-      if (!pid || pid === NO_USER_PID) return '(无)';
-      if (!this.teacherList || !this.teacherList.length) return '(载入中)';
-
-      const teacher = this.teacherList.filter((teacher) => teacher.pid === pid)[0];
-      if (!teacher) throw new Error(`No teacher found matching pid ${pid}`);
-      return teacher.teacher_name;
-    },
-    getStudentName(pid) {
-      if (!pid || pid === NO_USER_PID) return '(无)';
-      if (!this.studentList || !this.studentList.length) return '(载入中)';
-
-      const student = this.studentList.filter((student) => student.pid === pid)[0];
-      if (!student) throw new Error(`No student found matching pid ${pid}`);
-      return student.student_name;
     },
   },
 }

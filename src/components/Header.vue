@@ -4,7 +4,7 @@ header(:class="{'-scrolled': isScrolled}")
   nav
     template(v-if="$route.path !== '/signin'")
       ant-button(v-if="!isSignedin", type="primary", @click="navigateTo('signin')") 登录
-      ant-button(v-else, @click="signout") 登出
+      ant-button(v-else, @click="signout") 注销
     ant-button(v-if="isSignedin && $route.path === '/'", type="primary", @click="navigateTo('courses')") 课程管理入口
 </template>
 
