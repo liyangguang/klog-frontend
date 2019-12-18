@@ -1,14 +1,18 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import store from './store.js'
+import Cookies from 'js-cookie';
+import {callApi} from './api.js';
+import {COOKIE_KEY_NAME} from './store.js';
+
+// pages
 import Landing from './components/Landing.vue';
 import Courses from './components/Courses.vue';
 import Students from './components/Students.vue';
 import Signin from './components/SignIn.vue';
 import UploadDemo from './embededViews/UploadDemo.vue';
-import store from './store.js'
-import Cookies from 'js-cookie';
-import {callApi} from './api.js';
-import {COOKIE_KEY_NAME} from './store.js';
+import EmbededCourses from './embededViews/Courses.vue';
+import EmbededStudents from './embededViews/Students.vue';
 
 Vue.use(VueRouter);
 
@@ -28,6 +32,8 @@ const routes = [
   {path: '/signin', component: Signin},
   {path: '/courses', component: Courses, beforeEnter: routeGuard},
   {path: '/students/:coursePid', component: Students, beforeEnter: routeGuard},
+  {path: '/_embed/courses', component: EmbededCourses, beforeEnter: routeGuard},
+  {path: '/_embed/students/:coursePid', component: EmbededStudents, beforeEnter: routeGuard},
   {path: '/_embed/upload', component: UploadDemo},
   {path: '*', redirect: '/'},
 ];

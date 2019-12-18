@@ -1,15 +1,17 @@
 <template lang="pug">
 main
-  h1 学生管理
-  p {{pageMessage}}
-  p {{course.course_name}}
-  p.teacher 老师: {{getTeacherName(course.teacher_pid)}}
-  p.teacher 助教: {{getTeacherName(course.assistant_pid)}}
-  .grid
-    ant-card(v-for="(item, _key) in currentCourseStudentRefs", :key="_key")
-      p {{getStudentName(item.student_pid)}}
-    ant-card(:bodyStyle="{'min-height': '10em', 'text-align': 'center'}")
-      ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addButton", aria-label="添加")
+  p(v-if="pageMessage") {{pageMessage}}
+  .course-info
+    h1 {{course.course_name}}
+    p
+      span.teacher 老师: {{getTeacherName(course.teacher_pid)}}, 
+      span.teacher 助教: {{getTeacherName(course.assistant_pid)}}, 
+      span.more 课程信息: {{course.course_intro}}
+    h2 学生列表
+  ant-list.list(:dataSource="currentCourseStudentRefs")
+    ant-list-item(slot="renderItem", slot-scope="item, index")
+      ant-list-item-meta(:title="getStudentName(item.student_pid)")
+  ant-button.add-button(slot="actions", icon="plus", size="large", @click="addButton") 添加
   ant-modal(title="添加学生", :visible="isModalVisible", @ok="modalOk", @cancel="isModalVisible = false", okText="确认", cancelText="取消")
     ant-form(formLayout="horizontal")
       ant-form-item(label="学生列表", :label-col="{span: 4}", :wrapper-col="{span: 20}")
@@ -24,7 +26,7 @@ main
 <script>
 import {
   Button as AntButton,
-  Card as AntCard,
+  List as AntList,
   Modal as AntModal,
   Form as AntForm,
   Input as AntInput,
@@ -38,7 +40,14 @@ const NEW_STUDENT_VALUE = 'CREATE_NEW';
 
 export default {
   mixins: [teacherMixin, studentMixin],
-  components: {AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput, AntSelect, AntSelectOption: AntSelect.Option},
+  components: {
+    AntButton,
+    AntModal,
+    AntForm, AntFormItem: AntForm.Item,
+    AntInput,
+    AntSelect, AntSelectOption: AntSelect.Option,
+    AntList, AntListItem: AntList.Item, AntListItemMeta: AntList.Item.Meta,
+  },
   data() {
     return {
       course: {},
@@ -115,38 +124,22 @@ export default {
 @import '../variables.css';
 
 main {
-  padding: 6em 2em 1em;
+  background: #fff;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 2em;
+.course-info {
+  padding: 1em;
 }
 
-p {
-  margin: .5em 0;
+.list {
+  padding: 0 1em;
 }
 
 .add-button {
-  transform: scale(1.5) translateY(40%);
-}
-
-@media screen and (max-width: 1000px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media screen and (max-width: 800px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media screen and (max-width: 600px) {
-  .grid {
-    grid-template-columns: repeat(1, 1fr);
-  }
+  width: 100%;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 0;
 }
 </style>

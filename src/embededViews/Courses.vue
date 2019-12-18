@@ -1,17 +1,17 @@
 <template lang="pug">
 main
-  h1 课程管理
-  p {{pageMessage}}
-  .grid
-    ant-card(v-for="(item, _key) in courses", :key="_key", :title="item.course_name")
-      ant-button(slot="extra", shape="circle", icon="edit", @click="editButton(item)", aria-label="编辑课程")
-      p.teacher 老师: {{getTeacherName(item.teacher_pid)}}
-      p.teacher 助教: {{getTeacherName(item.assistant_pid)}}
-      p.more 课程信息: {{item.course_intro}}
-      ant-button(@click="openStudents(item.pid)", size="small") 管理学生
+  p(v-if="pageMessage") {{pageMessage}}
+  ant-list.list(:dataSource="courses")
+    ant-list-item(slot="renderItem", slot-scope="item, index")
+      ant-list-item-meta(:title="item.course_name")
+        div(slot="description")
+          span.teacher 老师: {{getTeacherName(item.teacher_pid)}}, 
+          span.teacher 助教: {{getTeacherName(item.assistant_pid)}}, 
+          span.more 课程信息: {{item.course_intro}}
+      ant-button(slot="actions", shape="circle", icon="edit", @click="editButton(item)", aria-label="编辑课程")
+      ant-button(slot="actions", @click="openStudents(item.pid)", size="small") 管理学生
         span(v-if="item.studentCount") ({{item.studentCount}})
-    ant-card(title="添加新课程", :bodyStyle="{'min-height': '10em', 'text-align': 'center'}")
-      ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addButton", aria-label="添加")
+  ant-button.add-button(slot="actions", icon="plus", size="large", @click="addButton") 添加新课程
   ant-modal(:title="modalContent.pid ? '编辑课程' : '添加新课程'", :visible="isModalVisible", @ok="modalOk", @cancel="isModalVisible = false", okText="确认", cancelText="取消")
     ant-form(formLayout="horizontal")
       ant-form-item(label="名称", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.course_name")
@@ -27,8 +27,9 @@ main
 
 <script>
 import {
+  Icon as AntIcon,
+  List as AntList,
   Button as AntButton,
-  Card as AntCard,
   Modal as AntModal,
   Form as AntForm,
   Input as AntInput,
@@ -39,7 +40,15 @@ import {teacherMixin} from '../mixins.js';
 
 export default {
   mixins: [teacherMixin],
-  components: {AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput, AntSelect, AntSelectOption: AntSelect.Option},
+  components: {
+    AntIcon,
+    AntButton,
+    AntForm, AntFormItem: AntForm.Item,
+    AntInput,
+    AntModal,
+    AntSelect, AntSelectOption: AntSelect.Option,
+    AntList, AntListItem: AntList.Item, AntListItemMeta: AntList.Item.Meta,
+  },
   data() {
     return {
       courses: [],
@@ -105,7 +114,7 @@ export default {
       };
     },
     openStudents(courseId) {
-      this.$router.push(`/students/${courseId}`);
+      this.$router.push(`/_embed/students/${courseId}`);
     },
   },
 }
@@ -116,42 +125,18 @@ export default {
 @import '../variables.css';
 
 main {
-  padding: 6em 2em 1em;
+  background: #fff;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 2em;
-}
-
-p {
-  margin: .5em 0;
-}
-
-.student-button {
-  margin-left: 1em;
+.list {
+  padding: 0 1em;
 }
 
 .add-button {
-  transform: scale(1.5) translateY(40%);
-}
-
-@media screen and (max-width: 1000px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media screen and (max-width: 800px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media screen and (max-width: 600px) {
-  .grid {
-    grid-template-columns: repeat(1, 1fr);
-  }
+  width: 100%;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 0;
 }
 </style>
