@@ -16,20 +16,36 @@ import EmbededStudents from './embededViews/Students.vue';
 
 Vue.use(VueRouter);
 
-const routeGuard = async (_to, _from, next) => {
+const routeGuard = async (to, _from, next) => {
   const pid = Cookies.get(COOKIE_KEY_NAME) || (store.state.currentUser || {}).pid;
-  if (!pid) {
-    router.replace('signin');
-    return;
+  if (pid) {
+    store.commit('setCurrentUser', {user: (await callApi('config/teacher', {pid}))[0]});
   }
-  store.commit('setCurrentUser', {user: (await callApi('config/teacher', {pid}))[0]});
-  next();
+  switch(to.path.split('/')[1]) {
+    case '':
+      next();
+      break;
+    case 'signin':
+      pid ? router.replace('courses') : next();
+      break;
+    case 'courses':
+    case 'students':
+      pid ? next() : router.replace('signin');
+      break;
+    case '_embed':
+      // Temporarily inject a user into the embed. We don't want user log in from embed page.
+      // TODO(yangguang) remove this once the android connection is finished.
+      const HARD_CODE_TEACHER_UID = '5df9855369c14386d2d42222';  // new-test
+      store.commit('setCurrentUser', {user: (await callApi('config/teacher', {pid: HARD_CODE_TEACHER_UID}))[0]});
+      next();
+      break;
+  }
 };
 
 const routes = [
   // Note: `_api` is reserved for the node server, like `/_api/upload`
-  {path: '/', component: Landing},
-  {path: '/signin', component: Signin},
+  {path: '/', component: Landing, beforeEnter: routeGuard},
+  {path: '/signin', component: Signin, beforeEnter: routeGuard},
   {path: '/courses', component: Courses, beforeEnter: routeGuard},
   {path: '/students/:coursePid', component: Students, beforeEnter: routeGuard},
   {path: '/_embed/courses', component: EmbededCourses, beforeEnter: routeGuard},
