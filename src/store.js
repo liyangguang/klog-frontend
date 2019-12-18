@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 
 Vue.use(Vuex);
 
-const COOKIE_KEY_NAME = 'klog-user-pid';
+export const COOKIE_KEY_NAME = 'klog-user-pid';
 
 export default new Vuex.Store({
   state: {
@@ -18,6 +18,10 @@ export default new Vuex.Store({
       } else if (payload.save === false) {  // undefined => pass
         Cookies.remove(COOKIE_KEY_NAME);
       }
+    },
+    signout(state) {
+      state.currentUser = null;
+      Cookies.remove(COOKIE_KEY_NAME);
     },
   },
 });

@@ -2,7 +2,10 @@
 header(:class="{'-scrolled': isScrolled}")
   router-link.logo(to="/") KLog
   nav
-    ant-button(v-for="(nav, _key) in navs", :key="_key", type="primary", @click="navigateTo(nav.path)") {{nav.title}}
+    template(v-if="$route.path !== '/signin'")
+      ant-button(v-if="!isSignedin", type="primary", @click="navigateTo('signin')") 登录
+      ant-button(v-else, @click="signout") 登出
+    ant-button(v-if="isSignedin && $route.path === '/'", type="primary", @click="navigateTo('courses')") 课程管理入口
 </template>
 
 <script>
@@ -10,15 +13,17 @@ import {Button as AntButton} from 'ant-design-vue';
 
 const SCROLL_THRESHOLD = 60;
 
-// const DASHBOARD_NAV = [{path: 'courses', title: '课程管理入口'}];
-
 export default {
   components: {AntButton},
-  props: ['navs'],
   data(){
     return {
       isScrolled: false,
     };
+  },
+  computed: {
+    isSignedin() {
+      return !!this.$store.state.currentUser;
+    },
   },
   created() {
     window.addEventListener('scroll', () => {
@@ -28,6 +33,10 @@ export default {
   methods: {
     navigateTo(path) {
       this.$router.push(path);
+    },
+    signout() {
+      this.$store.commit('signout');
+      this.navigateTo('/');
     },
   },
 }
@@ -60,5 +69,9 @@ header {
 nav {
   display: flex;
   align-items: center;
+}
+
+button {
+  margin-left: 1em;
 }
 </style>

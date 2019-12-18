@@ -8,11 +8,12 @@ import UploadDemo from './embededViews/UploadDemo.vue';
 import store from './store.js'
 import Cookies from 'js-cookie';
 import {callApi} from './api.js';
+import {COOKIE_KEY_NAME} from './store.js';
 
 Vue.use(VueRouter);
 
 const routeGuard = async (_to, _from, next) => {
-  const pid = Cookies.get('klog-user-pid') || (store.state.currentUser || {}).pid;
+  const pid = Cookies.get(COOKIE_KEY_NAME) || (store.state.currentUser || {}).pid;
   if (!pid) {
     router.replace('signin');
     return;
