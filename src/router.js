@@ -11,16 +11,14 @@ import {callApi} from './api.js';
 
 Vue.use(VueRouter);
 
-const routeGuard = (_to, _from, next) => {
+const routeGuard = async (_to, _from, next) => {
   const pid = Cookies.get('klog-user-pid') || (store.state.currentUser || {}).pid;
   if (!pid) {
     router.replace('signin');
     return;
   }
-  callApi('config/teacher', {pid}).then((teacher) => {
-    store.commit('setCurrentUser', {user: teacher[0]});
-    next();
-  });
+  store.commit('setCurrentUser', {user: (await callApi('config/teacher', {pid}))[0]});
+  next();
 };
 
 const routes = [

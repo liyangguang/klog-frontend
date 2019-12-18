@@ -11,7 +11,7 @@ main
       ant-button(@click="openStudents(item.pid)", size="small") 管理学生 ({{item.studentCount}})
     ant-card(title="添加新课程", :bodyStyle="{'min-height': '10em', 'text-align': 'center'}")
       ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addButton", aria-label="添加")
-  ant-modal(:title="modalContent.pid ? '编辑课程' : '添加新课程'", :visible="isModalVisible", @ok="modalOk", @cancel="isModalVisible = false")
+  ant-modal(:title="modalContent.pid ? '编辑课程' : '添加新课程'", :visible="isModalVisible", @ok="modalOk", @cancel="isModalVisible = false", okText="确认", cancelText="取消")
     ant-form(formLayout="horizontal")
       ant-form-item(label="名称", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.course_name")
       ant-form-item(label="老师", :label-col="{span: 4}", :wrapper-col="{span: 20}")
@@ -33,7 +33,6 @@ import {
   Input as AntInput,
   Select as AntSelect,
 } from 'ant-design-vue';
-import {sha256} from 'js-sha256';
 import {callApi} from '../api.js';
 
 const NO_TEACHER_PID = '000000000000000000000000';
@@ -55,34 +54,35 @@ export default {
     this._loadTeacherList();
   },
   methods: {
-    _loadTeacherList() {
+    async _loadTeacherList() {
       const filter = {fkey: 'institute_pid', fid: this.$store.state.currentUser.institute_pid};
-      return callApi('config/teacher', filter).then((teachers) => {
-        this.teacherList = teachers;
-      }).catch((error) => {
+      try {
+        this.teacherList = await callApi('config/teacher', filter);
+      } catch(error) {
         console.error(error);
         this.teacherList = [{pid: null, teacher_name: '获取教师列表失败'}];
-      });
+      };
     },
-    _loadCourses() {
-      const filter = {fkey: 'teacher_pid', fid: this.$store.state.currentUser.pid};
-      return callApi('config/course', filter).then((courses) => {
-        this.courses = courses.filter((course) => course.teacher_pid === this.$store.state.currentUser.pid || course.assistant_pid === this.$store.state.currentUser.pid);
+    async _loadCourses() {
+      try {
+        // TODO(yangguang): remove the .filter() once the backend filter works
+        const filter = {fkey: 'teacher_pid', fid: this.$store.state.currentUser.pid};
+        this.courses = (await callApi('config/course', filter)).filter((course) => [course.teacher_pid, course.assistant_pid].includes(this.$store.state.currentUser.pid));
         this.courses.forEach((course) => {
           this._loadCourseStudentsRefs(course);
         });
-      }).catch((error) => {
+      } catch(error) {
         console.error(error);
         this.pageMessage = '获取课程列表失败. ' + error.message;
-      });
+      };
     },
-    _loadCourseStudentsRefs(course) {
-      return callApi('config/reference/student_course', {student_pid: 'all', course_pid: course.pid}).then((refs) => {
-        this.$set(course, 'studentCount', refs.length);
-      }).catch((error) => {
+    async _loadCourseStudentsRefs(course) {
+      try {
+        this.$set(course, 'studentCount', (await callApi('config/reference/student_course', {student_pid: 'all', course_pid: course.pid})).length);
+      } catch(error) {
         console.error(error);
         this.$set(course, 'studentCount', '(获取学生人数失败)');
-      });
+      };
     },
     addButton() {
       this.modalContent = this._getDefaultNewCourseFields();
@@ -92,22 +92,23 @@ export default {
       this.modalContent = item;
       this.isModalVisible = true;
     },
-    modalOk() {
+    async modalOk() {
       const isNew = !this.modalContent.pid;
       // TODO: If we can remove it from the database, remove this.
       if (isNew) {
-        this.modalContent.course_uid = 'uid' + sha256(this.modalContent.course_name + (new Date()).toString());
+        this.modalContent.course_uid = 'uid-' + (new Date()).getTime();
       }
-      callApi('config/course', this.modalContent, isNew ? 'POST' : 'PUT').then((newPid) => {
+      try {
+        const newPid = await callApi('config/course', this.modalContent, isNew ? 'POST' : 'PUT');
         if (isNew) {
           this.modalContent.pid = newPid;
           this.courses.push(this.modalContent);
         }
         this.isModalVisible = false;
-      }).catch((error) => {
+      } catch(error) {
         console.error(error);
         this.modalMessage = error.message;
-      });
+      };
     },
     getTeacherName(pid) {
       if (!pid || pid === NO_TEACHER_PID) return '(无)';

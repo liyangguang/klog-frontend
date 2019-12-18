@@ -10,7 +10,7 @@ main
       p {{getStudentName(item.student_pid)}}
     ant-card(title="添加学生", :bodyStyle="{'min-height': '10em', 'text-align': 'center'}")
       ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addButton", aria-label="添加")
-  ant-modal(title="添加学生", :visible="isModalVisible", @ok="modalOk", @cancel="isModalVisible = false")
+  ant-modal(title="添加学生", :visible="isModalVisible", @ok="modalOk", @cancel="isModalVisible = false", okText="确认", cancelText="取消")
     ant-form(formLayout="horizontal")
       ant-form-item(label="学生列表", :label-col="{span: 4}", :wrapper-col="{span: 20}")
         ant-select(v-model="modalContent.student_pid")
@@ -58,69 +58,73 @@ export default {
     },
   },
   created() {
-    this._loadCourse();
-    this._loadCourseStudentsRefs();
-    this._loadAllStudents();
-    this._loadTeacherList();
+    this._loadCourse();  // For course info
+    this._loadCourseStudentsRefs();  // For student list
+    this._loadAllStudents();  // For getting student name
+    this._loadTeacherList();  // For getting teacher name
   },
   methods: {
-    _loadCourse() {
-      return callApi('config/course', {pid: this.$route.params.coursePid}).then((course) => {
-        this.course = course[0];
-      }).catch((error) => {
+    async _loadCourse() {
+      try {
+        this.course = (await callApi('config/course', {pid: this.$route.params.coursePid}))[0];
+      } catch(error) {
         console.error(error);
         this.pageMessage = '获取课程信息失败. ' + error.message;
-      });
+      };
     },
-    _loadCourseStudentsRefs() {
-      return callApi('config/reference/student_course', {student_pid: 'all', course_pid: this.$route.params.coursePid}).then((refs) => {
-        this.currentCourseStudentRefs = refs;
-      }).catch((error) => {
+    async _loadCourseStudentsRefs() {
+      try {
+        this.currentCourseStudentRefs = await callApi('config/reference/student_course', {student_pid: 'all', course_pid: this.$route.params.coursePid});
+      } catch(error) {
         console.error(error);
         this.pageMessage = '获取学生列表失败. ' + error.message;
-      });
+      };
     },
-    _loadAllStudents() {
-      return callApi('config/student').then((students) => {
-        this.studentList = students;
-      }).catch((error) => {
+    async _loadAllStudents() {
+      try {
+        this.studentList = await callApi('config/student');
+      } catch(error) {
         console.error(error);
         this.studentList = [{student_name: '获取学生列表失败'}];
-      });
+      };
     },
-    _loadTeacherList() {
+    async _loadTeacherList() {
       const filter = {fkey: 'institute_pid', fid: this.$store.state.currentUser.institute_pid};
-      return callApi('config/teacher', filter).then((teachers) => {
-        this.teacherList = teachers;
-      }).catch((error) => {
+      try {
+        this.teacherList = await callApi('config/teacher', filter);
+      } catch(error) {
         console.error(error);
-      });
+        this.pageMessage = '获取教师列表失败. ' + error.message;
+      };
     },
     addButton() {
       this.modalContent = {};
       this.isModalVisible = true;
     },
-    modalOk() {
-      if (this.modalContent.student_pid === NEW_STUDENT_VALUE) {
-        callApi('config/student', this.modalContent, 'POST').then((newPid) => {
-          return this._addStudentCourseRelationship(newPid);
-        }).catch((error) => {
-          console.error(error);
-          this.modalMessage = '更新学生信息失败. ' + error.message;
-        });
-      } else {
-        this._addStudentCourseRelationship(this.modalContent.student_pid);
+    async modalOk() {
+      try {
+        if (this.modalContent.student_pid === NEW_STUDENT_VALUE) {
+          const newPid = await callApi('config/student', this.modalContent, 'POST');
+          this.studentList.push((await callApi('config/student', {pid: newPid}))[0]);
+          await this._addStudentCourseRelationship(newPid);
+        } else {
+          await this._addStudentCourseRelationship(this.modalContent.student_pid);
+        }
+      } catch (error) {
+        console.error(error);
+        this.modalMessage = error.message;
       }
     },
-    _addStudentCourseRelationship(studentPid) {
-      const payload = {course_pid: this.$route.params.coursePid, student_pid: studentPid};
-      return callApi('config/reference/student_course', payload, 'POST').then(() => {
+    async _addStudentCourseRelationship(studentPid) {
+      try {
+        const payload = {course_pid: this.$route.params.coursePid, student_pid: studentPid};
+        await callApi('config/reference/student_course', payload, 'POST');
         this.currentCourseStudentRefs.push(payload);
         this.isModalVisible = false;
-      }).catch((error) => {
+      } catch(error) {
         console.error(error);
         this.modalMessage = '添加学生失败. ' + error.message;
-      });
+      };
     },
     getTeacherName(pid) {
       if (!pid || pid === NO_USER_PID) return '(无)';

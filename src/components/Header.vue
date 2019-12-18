@@ -10,6 +10,8 @@ import {Button as AntButton} from 'ant-design-vue';
 
 const SCROLL_THRESHOLD = 60;
 
+// const DASHBOARD_NAV = [{path: 'courses', title: '课程管理入口'}];
+
 export default {
   components: {AntButton},
   props: ['navs'],

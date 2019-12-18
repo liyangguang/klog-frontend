@@ -49,26 +49,26 @@ export default {
     this._loadInstituteList();
   },
   methods: {
-    _loadInstituteList() {
-      callApi('config/institute').then((instituteList) => {
-        this.instituteList = instituteList;
-      }).catch((error) => {
+    async _loadInstituteList() {
+      try {
+        this.instituteList = await callApi('config/institute');
+      } catch(error) {
         this.instituteList = [{institute_name: '获取学校列表失败'}];
-      });
+      };
     },
-    login() {
+    async login() {
       const payload = {
         teacher_uid: this.teacher_uid,
         teacher_key: this.teacher_key,
       };
-      callApi('workflow/teacher/login', payload, 'POST').then((teacher) => {
-        this.$store.commit('setCurrentUser', {user: teacher, save: this.doSaveInCookie});
+      try {
+        this.$store.commit('setCurrentUser', {user: await callApi('workflow/teacher/login', payload, 'POST'), save: this.doSaveInCookie});
         this.$router.push('/courses');
-      }).catch((error) => {
-        this.message = error;
-      });
+      } catch(error) {
+        this.message = error.message;
+      };
     },
-    register() {
+    async register() {
       if (!this.isRegistering) {
         this.isRegistering = true;
         return;
@@ -81,11 +81,12 @@ export default {
         email: this.email,
         institute_pid: this.institute_pid,
       };
-      callApi('config/teacher', payload, 'POST').then(() => {
+      try {
+        await callApi('config/teacher', payload, 'POST')
         this.$router.go();
-      }).catch((error) => {
-        this.message = error;
-      });
+      } catch(error) {
+        this.message = error.message;
+      };
     }
   },
 }

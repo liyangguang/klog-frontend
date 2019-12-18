@@ -3,7 +3,7 @@ import {sha256} from 'js-sha256';
 const ROOT = 'https://klogserver.westus2.cloudapp.azure.com/api/0/';
 const ALL_VALUE = 'all';
 
-export function callApi(path, payload = {}, method) {
+export async function callApi(path, payload = {}, method) {
   let option = {};
   let params = '';
   if (method) {
@@ -21,11 +21,11 @@ export function callApi(path, payload = {}, method) {
     }
   }
 
-  return fetch(`${ROOT}${path}${params}`, option).then((res) => {
-    if (res.ok) {
-      return res.json().then((res) => res.payload);
-    } else {
-      return res.json().then((res) => {throw new Error(res.message);});
-    }
-  });
+  const response = await fetch(`${ROOT}${path}${params}`, option);
+  const data = await response.json();
+  if (response.ok) {
+    return data.payload;
+  } else {
+    throw new Error(data.message);
+  }
 }
