@@ -1,5 +1,7 @@
 import {sha256} from 'js-sha256';
 
+// TODO(yangguang): Move it to backend, graphql
+
 const ROOT = 'https://klogserver.westus2.cloudapp.azure.com/api/0/';
 const ALL_VALUE = 'all';
 
