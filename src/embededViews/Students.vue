@@ -2,6 +2,7 @@
 main
   p(v-if="pageMessage") {{pageMessage}}
   .course-info
+    router-link(to="/_embed/courses") 返回课程列表
     h1 {{course.course_name}}
     p
       span.teacher 老师: {{getTeacherName(course.teacher_pid)}}, 

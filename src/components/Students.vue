@@ -1,5 +1,6 @@
 <template lang="pug">
 main
+  router-link(to="/courses") 返回课程列表
   h1 学生管理
   p {{pageMessage}}
   p {{course.course_name}}
