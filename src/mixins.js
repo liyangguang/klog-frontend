@@ -41,6 +41,7 @@ export const studentMixin = {
     this._loadAllStudents();
   },
   methods: {
+    // TODO(yangguang): Do we really need to load them all? Can we filter, or just use the pid to get each student separately?
     async _loadAllStudents() {
       try {
         this.studentList = await callApi('config/student');
@@ -56,6 +57,13 @@ export const studentMixin = {
       const student = this.studentList.filter((student) => student.pid === pid)[0];
       if (!student) return '(未找到)';
       return student.student_name;
+    },
+    getStudent(pid) {
+      if (!pid || pid === NO_USER_PID) return {};
+      if (!this.studentList || !this.studentList.length) return {};
+
+      const student = this.studentList.filter((student) => student.pid === pid)[0];
+      return student || {};
     },
   },
 }

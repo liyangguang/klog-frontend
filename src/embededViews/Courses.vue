@@ -38,6 +38,7 @@ import {
 import {callApi} from '../api.js';
 import {teacherMixin} from '../mixins.js';
 
+// TODO(yangguang): Move common code in desktop/embed into mixins.
 export default {
   mixins: [teacherMixin],
   components: {

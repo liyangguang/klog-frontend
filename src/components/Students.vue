@@ -8,8 +8,10 @@ main
   p.teacher 助教: {{getTeacherName(course.assistant_pid)}}
   .grid
     ant-card(v-for="(item, _key) in currentCourseStudentRefs", :key="_key")
+      img.avatar(:src="getStudent(item.student_pid).student_image_url")
       p {{getStudentName(item.student_pid)}}
-    ant-card(:bodyStyle="{'min-height': '10em', 'text-align': 'center'}")
+      ant-button(size="small", disabled) 绑定家长
+    ant-card(:bodyStyle="{'min-height': '8em', 'text-align': 'center'}")
       ant-button.add-button(type="primary", shape="circle", icon="plus", size="large", @click="addButton", aria-label="添加")
   ant-modal(title="添加学生", :visible="isModalVisible", @ok="modalOk", @cancel="isModalVisible = false", okText="确认", cancelText="取消")
     ant-form(formLayout="horizontal")
@@ -19,6 +21,9 @@ main
           ant-select-option(:value="NEW_STUDENT_VALUE") [注册新学生]
       template(v-if="modalContent.student_pid === NEW_STUDENT_VALUE")
         ant-form-item(label="姓名", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.student_name")
+        img.image-preview(:src="modalContent.student_image_url")
+        upload-image(@message="uploadMessage = $event", @url="modalContent.student_image_url = $event")
+        p {{uploadMessage}}
       p {{modalMessage}}
 </template>
 
@@ -35,11 +40,13 @@ import {sha256} from 'js-sha256';
 import {callApi} from '../api.js';
 import {teacherMixin, studentMixin} from '../mixins.js';
 
+import UploadImage from './UploadImage.vue';
+
 const NEW_STUDENT_VALUE = 'CREATE_NEW';
 
 export default {
   mixins: [teacherMixin, studentMixin],
-  components: {AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput, AntSelect, AntSelectOption: AntSelect.Option},
+  components: {UploadImage, AntButton, AntCard, AntModal, AntForm, AntFormItem: AntForm.Item, AntInput, AntSelect, AntSelectOption: AntSelect.Option},
   data() {
     return {
       course: {},
@@ -47,6 +54,7 @@ export default {
       modalContent: {},
       modalMessage: '',
       pageMessage: '',
+      uploadMessage: '',
       currentCourseStudentRefs: [],
       NEW_STUDENT_VALUE: NEW_STUDENT_VALUE,
     };
@@ -129,8 +137,21 @@ p {
   margin: .5em 0;
 }
 
+.avatar {
+  width: 5em;
+  height: 5em;
+  object-fit: cover;
+  border-radius: 50%;
+  float: left;
+  margin-right: 1em;
+}
+
+.image-preview {
+  width: 100%;
+}
+
 .add-button {
-  transform: scale(1.5) translateY(40%);
+  transform: scale(1.5) translateY(30%);
 }
 
 @media screen and (max-width: 1000px) {

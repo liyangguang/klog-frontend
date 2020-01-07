@@ -12,6 +12,8 @@ main
   ant-list.list(:dataSource="currentCourseStudentRefs")
     ant-list-item(slot="renderItem", slot-scope="item, index")
       ant-list-item-meta(:title="getStudentName(item.student_pid)")
+        ant-avatar(slot="avatar", :src="getStudent(item.student_pid).student_image_url")
+      ant-button(size="small", disabled) 绑定家长
   ant-button.add-button(slot="actions", icon="plus", size="large", @click="addButton") 添加
   ant-modal(title="添加学生", :visible="isModalVisible", @ok="modalOk", @cancel="isModalVisible = false", okText="确认", cancelText="取消")
     ant-form(formLayout="horizontal")
@@ -21,11 +23,15 @@ main
           ant-select-option(:value="NEW_STUDENT_VALUE") [注册新学生]
       template(v-if="modalContent.student_pid === NEW_STUDENT_VALUE")
         ant-form-item(label="姓名", :label-col="{span: 4}", :wrapper-col="{span: 20}"): ant-input(v-model="modalContent.student_name")
+        img.image-preview(:src="modalContent.student_image_url")
+        upload-image(@message="uploadMessage = $event", @url="modalContent.student_image_url = $event")
+        p {{uploadMessage}}
       p {{modalMessage}}
 </template>
 
 <script>
 import {
+  Avatar as AntAvatar,
   Button as AntButton,
   List as AntList,
   Modal as AntModal,
@@ -34,14 +40,19 @@ import {
   Select as AntSelect,
 } from 'ant-design-vue';
 import {sha256} from 'js-sha256';
+
 import {callApi} from '../api.js';
 import {teacherMixin, studentMixin} from '../mixins.js';
+import UploadImage from '../components/UploadImage.vue';
 
 const NEW_STUDENT_VALUE = 'CREATE_NEW';
 
+// TODO(yangguang): Move common code in desktop/embed into mixins.
 export default {
   mixins: [teacherMixin, studentMixin],
   components: {
+    UploadImage,
+    AntAvatar,
     AntButton,
     AntModal,
     AntForm, AntFormItem: AntForm.Item,
@@ -56,6 +67,7 @@ export default {
       modalContent: {},
       modalMessage: '',
       pageMessage: '',
+      uploadMessage: '',
       currentCourseStudentRefs: [],
       NEW_STUDENT_VALUE: NEW_STUDENT_VALUE,
     };

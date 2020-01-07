@@ -33,10 +33,8 @@ const routeGuard = async (to, _from, next) => {
       pid ? next() : router.replace('signin');
       break;
     case '_embed':
-      // Temporarily inject a user into the embed. We don't want user log in from embed page.
-      // TODO(yangguang) remove this once the android connection is finished.
-      const HARD_CODE_TEACHER_UID = '5df9855369c14386d2d42222';  // new-test
-      store.commit('setCurrentUser', {user: (await callApi('config/teacher', {pid: HARD_CODE_TEACHER_UID}))[0]});
+      // TODO(yangguang) get the pid from webview communication
+      store.commit('setCurrentUser', {user: (await callApi('config/teacher', {pid: to.query.pid}))[0]});
       next();
       break;
   }
