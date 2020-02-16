@@ -1,6 +1,6 @@
 <template lang="pug">
 #app
-  my-header(v-if="!isEmbed")
+  //- my-header(v-if="!isEmbed")
   router-view
 </template>
 
@@ -31,7 +31,7 @@ export default {
 @import './variables.css';
 
 #app {
-  background: var(--background-gray);
+  /* background: var(--background-gray); */
   min-height: 100vh;
 }
 </style>

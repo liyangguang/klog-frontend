@@ -13,6 +13,7 @@ import Signin from './components/SignIn.vue';
 import UploadDemo from './embededViews/UploadDemo.vue';
 import EmbededCourses from './embededViews/Courses.vue';
 import EmbededStudents from './embededViews/Students.vue';
+import Signup from './components/Signup.vue';
 
 Vue.use(VueRouter);
 
@@ -42,13 +43,14 @@ const routeGuard = async (to, _from, next) => {
 
 const routes = [
   // Note: `_api` is reserved for the node server, like `/_api/upload`
-  {path: '/', component: Landing, beforeEnter: routeGuard},
-  {path: '/signin', component: Signin, beforeEnter: routeGuard},
-  {path: '/courses', component: Courses, beforeEnter: routeGuard},
-  {path: '/students/:coursePid', component: Students, beforeEnter: routeGuard},
-  {path: '/_embed/courses', component: EmbededCourses, beforeEnter: routeGuard},
-  {path: '/_embed/students/:coursePid', component: EmbededStudents, beforeEnter: routeGuard},
-  {path: '/_embed/upload', component: UploadDemo},
+  // {path: '/', component: Landing, beforeEnter: routeGuard},
+  // {path: '/signin', component: Signin, beforeEnter: routeGuard},
+  // {path: '/courses', component: Courses, beforeEnter: routeGuard},
+  // {path: '/students/:coursePid', component: Students, beforeEnter: routeGuard},
+  // {path: '/_embed/courses', component: EmbededCourses, beforeEnter: routeGuard},
+  // {path: '/_embed/students/:coursePid', component: EmbededStudents, beforeEnter: routeGuard},
+  // {path: '/_embed/upload', component: UploadDemo},
+  {path: '/', component: Signup},
   {path: '*', redirect: '/'},
 ];
 
