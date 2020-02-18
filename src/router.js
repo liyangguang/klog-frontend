@@ -13,7 +13,7 @@ import Signin from './components/SignIn.vue';
 import UploadDemo from './embededViews/UploadDemo.vue';
 import EmbededCourses from './embededViews/Courses.vue';
 import EmbededStudents from './embededViews/Students.vue';
-import Signup from './components/Signup.vue';
+import Ad from './components/Ad.vue';
 
 Vue.use(VueRouter);
 
@@ -50,7 +50,7 @@ const routes = [
   // {path: '/_embed/courses', component: EmbededCourses, beforeEnter: routeGuard},
   // {path: '/_embed/students/:coursePid', component: EmbededStudents, beforeEnter: routeGuard},
   // {path: '/_embed/upload', component: UploadDemo},
-  {path: '/', component: Signup},
+  {path: '/', component: Ad},
   {path: '*', redirect: '/'},
 ];
 

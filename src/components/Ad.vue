@@ -142,6 +142,11 @@ form {
 }
 
 @media screen and (max-width: 800px) {
+  main {
+    background-position: 50% 100%;
+    padding-bottom: 600px;
+  }
+
   .content {
     display: block;
     font-size: 0.8em;
