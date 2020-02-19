@@ -15,13 +15,15 @@ main(:class="{['_bg-' + (photoIndex + 1)]: true}")
           img(src="@/assets/speech-bubble.svg", alt="speech bubble icon")
           p Live chat with others in groups or 1-on-1
       p Coming soon! Sign up to get updates!
-      form
-        ant-input(type="email", name="email", placeholder="Email address")
-        ant-button(type="primary") Sign up
+      .form
+        ant-input(type="email", v-model="email", placeholder="Email address")
+        ant-button(type="primary", @click="submit") Sign up
 </template>
 
 <script>
 import {Button as AntButton, Input as AntInput} from 'ant-design-vue';
+
+import {callApi} from '../api.js';
 
 const SLIDE_INTERVAL = 5 * 1000;
 
@@ -29,6 +31,7 @@ export default {
   components: {AntButton, AntInput},
   data() {
     return {
+      email: '',
       photoIndex: 0,
       photos: [require('@/assets/ad/phone-1.png'), require('@/assets/ad/phone-2.png'), require('@/assets/ad/phone-3.png')],
     }
@@ -55,6 +58,13 @@ export default {
     },
     nextPhoto(){
       this.photoIndex = (this.photoIndex + 1) % this.photos.length;
+    },
+    submit(){
+      callApi('config/user', {
+        user_email: this.email,
+        updated_ts: Math.round(new Date().getTime() / 1000),
+        user_description: 'source from fb',
+    }, 'POST');
     },
   },
 }
@@ -152,6 +162,16 @@ form {
     left: 50%;
     height: 100vh;
     transform: translateX(-70%);
+  }
+}
+
+.form {
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+
+  & > button {
+    margin-left: 1em;
   }
 }
 
