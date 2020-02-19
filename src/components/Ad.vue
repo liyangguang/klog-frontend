@@ -72,7 +72,7 @@ export default {
 main {
   position: relative;
   transition: background var(--transition);
-  background-size: auto 100vh;
+  background-size: auto 90vh;
   background-repeat: no-repeat;
   background-position: 75% 50%;
 
