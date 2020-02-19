@@ -15,9 +15,10 @@ main(:class="{['_bg-' + (photoIndex + 1)]: true}")
           img(src="@/assets/speech-bubble.svg", alt="speech bubble icon")
           p Live chat with others in groups or 1-on-1
       p Coming soon! Sign up to get updates!
-      .form
-        ant-input(type="email", v-model="email", placeholder="Email address")
+      .form(v-if="!hasSubmitted")
+        ant-input(type="email", v-model="email", placeholder="Email address", @keyup.enter="submit")
         ant-button(type="primary", @click="submit") Sign up
+      p(v-else) Thank you for signing up! We'll keep you updated.
 </template>
 
 <script>
@@ -32,6 +33,7 @@ export default {
   data() {
     return {
       email: '',
+      hasSubmitted: false,
       photoIndex: 0,
       photos: [require('@/assets/ad/phone-1.png'), require('@/assets/ad/phone-2.png'), require('@/assets/ad/phone-3.png')],
     }
@@ -64,7 +66,12 @@ export default {
         user_email: this.email,
         updated_ts: Math.round(new Date().getTime() / 1000),
         user_description: 'source from fb',
-    }, 'POST');
+      }, 'POST').catch((error) => {
+        console.error('Submit error.', error);
+      }).then(() => {
+        // We are just ignoring errors here.
+        this.hasSubmitted = true;
+      });
     },
   },
 }
