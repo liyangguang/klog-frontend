@@ -79,8 +79,6 @@ export default {
       this.photoIndex = (this.photoIndex + 1) % this.photos.length;
     },
     submit(){
-      this.$router.push(`${this.$route.path}/complete`);
-      return;
       callApi('config/user', {
         user_email: this.email,
         updated_ts: Math.round(new Date().getTime() / 1000),
@@ -88,7 +86,7 @@ export default {
       }, 'POST').catch((error) => {
         console.error('Submit error.', error);
       }).then(() => {
-        this.$router.push('./complete');
+        this.$router.push(`${this.$route.path}/complete`);
       });
     },
     _addFacebookTracking(){
