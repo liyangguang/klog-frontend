@@ -7,17 +7,18 @@ main(:class="{['_bg-' + (photoIndex + 1)]: true}")
       ul.features
         li
           img(src="@/assets/neural.svg", alt="neural icon")
-          p AI technology swaps your face
+          p {{text[0]}}
         li
           img(src="@/assets/camera.svg", alt="camera icon")
-          p Protect your identity and privacy
+          p {{text[1]}}
         li
           img(src="@/assets/speech-bubble.svg", alt="speech bubble icon")
-          p Live chat with others in groups or 1-on-1
-      p Coming soon! Sign up to get updates!
-      .form(v-if="!hasSubmitted")
-        ant-input(type="email", v-model="email", placeholder="Email address", @keyup.enter="submit")
-        ant-button(type="primary", @click="submit") Sign up
+          p {{text[2]}}
+      template(v-if="!hasSubmitted")
+        p {{text[3]}}
+        .form
+          ant-input(type="email", v-model="email", placeholder="Email address", @keyup.enter="submit")
+          ant-button(type="primary", @click="submit") Sign up
       p(v-else) Thank you for signing up! We'll keep you updated.
 </template>
 
@@ -27,16 +28,44 @@ import {Button as AntButton, Input as AntInput} from 'ant-design-vue';
 import {callApi} from '../api.js';
 
 const SLIDE_INTERVAL = 5 * 1000;
+const TEXT_FOR_CHAT = [
+  'Customize an attractive face for you',
+  'Swap your face with a generated face during video chatting',
+  'Anonymouse 1-on-1 video chat protecting your privacy',
+  'Coming soon! Sign up to get updates!',
+];
+
+const TEXT_FOR_SERVICE = [
+  'Customize the face you love',
+  'Customize the voice you love',
+  'Customize the service you love',
+  'Start from $5/hr coming soon! Sign up now to get membership discount!',
+];
 
 export default {
   components: {AntButton, AntInput},
   data() {
     return {
+      adType: this.$route.path.split('/')[1],  // chat | service
       email: '',
-      hasSubmitted: false,
       photoIndex: 0,
       photos: [require('@/assets/ad/phone-1.png'), require('@/assets/ad/phone-2.png'), require('@/assets/ad/phone-3.png')],
     }
+  },
+  computed: {
+    text() {
+      switch(this.adType) {
+        case 'chat':
+          return TEXT_FOR_CHAT;
+        case 'service':
+          return TEXT_FOR_SERVICE;
+        default:
+          return [];
+      }
+    },
+    hasSubmitted() {
+      return this.$route.path.split('/')[2] === 'complete';
+    },
   },
   created() {
     this._addFacebookTracking();
@@ -46,6 +75,22 @@ export default {
 
   },
   methods: {
+    nextPhoto(){
+      this.photoIndex = (this.photoIndex + 1) % this.photos.length;
+    },
+    submit(){
+      this.$router.push(`${this.$route.path}/complete`);
+      return;
+      callApi('config/user', {
+        user_email: this.email,
+        updated_ts: Math.round(new Date().getTime() / 1000),
+        user_description: 'source from fb',
+      }, 'POST').catch((error) => {
+        console.error('Submit error.', error);
+      }).then(() => {
+        this.$router.push('./complete');
+      });
+    },
     _addFacebookTracking(){
       !function(f,b,e,v,n,t,s)
       {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -57,21 +102,6 @@ export default {
       'https://connect.facebook.net/en_US/fbevents.js');
        fbq('init', '215864872930611'); 
       fbq('track', 'PageView');
-    },
-    nextPhoto(){
-      this.photoIndex = (this.photoIndex + 1) % this.photos.length;
-    },
-    submit(){
-      callApi('config/user', {
-        user_email: this.email,
-        updated_ts: Math.round(new Date().getTime() / 1000),
-        user_description: 'source from fb',
-      }, 'POST').catch((error) => {
-        console.error('Submit error.', error);
-      }).then(() => {
-        // We are just ignoring errors here.
-        this.hasSubmitted = true;
-      });
     },
   },
 }

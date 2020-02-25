@@ -50,8 +50,11 @@ const routes = [
   // {path: '/_embed/courses', component: EmbededCourses, beforeEnter: routeGuard},
   // {path: '/_embed/students/:coursePid', component: EmbededStudents, beforeEnter: routeGuard},
   // {path: '/_embed/upload', component: UploadDemo},
-  {path: '/', component: Ad},
-  {path: '*', redirect: '/'},
+  // {path: '*', redirect: '/'},
+  {path: '/chat', component: Ad},
+  {path: '/service', component: Ad},
+  {path: '/chat/complete', component: Ad},
+  {path: '/service/complete', component: Ad},
 ];
 
 const router = new VueRouter({
