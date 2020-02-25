@@ -80,6 +80,7 @@ export default {
     },
     submit(){
       callApi('config/user', {
+        ad_type: this.adType,
         user_email: this.email,
         updated_ts: Math.round(new Date().getTime() / 1000),
         user_description: 'source from fb',
