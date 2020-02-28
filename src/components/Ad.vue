@@ -79,7 +79,7 @@ export default {
           return TEXT_FOR_CHAT;
         case 'service':
           return TEXT_FOR_SERVICE;
-        case 'servicety':
+        case 'serviceyt':
           return TEXT_FOR_SERVICE;
         default:
           return [];
