@@ -20,6 +20,9 @@ main(:class="{['_bg-' + (photoIndex + 1)]: true}")
           ant-input(type="email", v-model="email", placeholder="Email address", @keyup.enter="submit")
           ant-button(type="primary", @click="submit") Sign up
       p(v-else) Thank you for signing up! We'll keep you updated.
+    .right
+      img(v-for="(src, index) in photos", :src="src", v-if="photoIndex === index")
+  .iframe-container: iframe(frameborder="0", allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture", :src="videoUrl")
 </template>
 
 <script>
@@ -42,22 +45,41 @@ const TEXT_FOR_SERVICE = [
   'Start from $5/hr coming soon! Sign up now to get membership discount!',
 ];
 
+const YOUTUBE_URL = {
+  chat: 'https://www.youtube.com/embed/W96M8ypbBPc',
+  service: 'https://www.youtube.com/embed/yE71o-eKFEA',
+};
+
 export default {
   components: {AntButton, AntInput},
   data() {
     return {
-      adType: this.$route.path.split('/')[1],  // chat | service
+      adType: this.$route.path.split('/')[1],  // chat | service | serviceyt
       email: '',
       photoIndex: 0,
       photos: [require('@/assets/ad/phone-1.png'), require('@/assets/ad/phone-2.png'), require('@/assets/ad/phone-3.png')],
     }
   },
   computed: {
+    videoUrl() {
+      switch(this.adType) {
+        case 'chat':
+          return YOUTUBE_URL.chat;
+        case 'service':
+          return YOUTUBE_URL.service;
+        case 'serviceyt':
+          return YOUTUBE_URL.service;
+        default:
+          return '';
+      }
+    },
     text() {
       switch(this.adType) {
         case 'chat':
           return TEXT_FOR_CHAT;
         case 'service':
+          return TEXT_FOR_SERVICE;
+        case 'servicety':
           return TEXT_FOR_SERVICE;
         default:
           return [];
@@ -68,7 +90,7 @@ export default {
     },
   },
   created() {
-    this._addFacebookTracking();
+    this._addTracking();
     setInterval(() => {
       this.nextPhoto();
     }, SLIDE_INTERVAL);
@@ -83,12 +105,23 @@ export default {
         user_description: `Registered via the ${this.adType} ad.`,
         user_email: this.email,
         updated_ts: Math.round(new Date().getTime() / 1000),
-        user_description: 'source from fb',
       }, 'POST').catch((error) => {
         console.error('Submit error.', error);
       }).then(() => {
         this.$router.push(`${this.$route.path}/complete`);
       });
+    },
+    _addTracking(){
+      switch(this.adType) {
+        case 'chat':
+          return this._addFacebookTracking();
+        case 'service':
+          return this._addFacebookTracking();
+        case 'servicety':
+          return this._addGoogleAdsTracking();
+        default:
+          return [];
+      }
     },
     _addFacebookTracking(){
       !function(f,b,e,v,n,t,s)
@@ -101,6 +134,9 @@ export default {
       'https://connect.facebook.net/en_US/fbevents.js');
        fbq('init', '215864872930611'); 
       fbq('track', 'PageView');
+    },
+    _addGoogleAdsTracking() {
+      window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'AW-663237508');
     },
   },
 }
@@ -118,22 +154,10 @@ export default {
 main {
   position: relative;
   transition: background var(--transition);
-  background-size: auto 90vh;
-  background-repeat: no-repeat;
-  background-position: 75% 50%;
 
-  &._bg-1 {
-    background-color: #009abf;
-    background-image: url(../assets/ad/phone-1.png);
-  }
-  &._bg-2 {
-    background-color: #fdc728;
-    background-image: url(../assets/ad/phone-2.png);
-  }
-  &._bg-3 {
-    background-color: #f16d3e;
-    background-image: url(../assets/ad/phone-3.png);
-  }
+  &._bg-1 {background-color: #009abf;}
+  &._bg-2 {background-color: #fdc728;}
+  &._bg-3 {background-color: #f16d3e;}
 }
 
 .content {
@@ -188,19 +212,6 @@ form {
   }
 }
 
-.right {
-  position: relative;
-  height: 100vh;
-
-  & > img {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    height: 100vh;
-    transform: translateX(-70%);
-  }
-}
-
 .form {
   max-width: 400px;
   margin: 0 auto;
@@ -214,7 +225,6 @@ form {
 @media screen and (max-width: 800px) {
   main {
     background-position: 50% 100%;
-    padding-bottom: 600px;
   }
 
   .content {
@@ -234,9 +244,28 @@ form {
       margin-bottom: 2em;
     }
   }
+}
 
-  .right {
-    display: none;
+.right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  & > img {
+    width: 300px;
   }
+}
+
+.iframe-container {
+  grid-column: 1/-1;
+  padding: 2em;
+}
+
+iframe {
+  display: block;
+  width: 800px;
+  max-width: 100%;
+  height: 450px;
+  margin: 0 auto;
 }
 </style>

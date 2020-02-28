@@ -53,8 +53,10 @@ const routes = [
   // {path: '*', redirect: '/'},
   {path: '/chat', component: Ad},
   {path: '/service', component: Ad},
+  {path: '/serviceyt', component: Ad},
   {path: '/chat/complete', component: Ad},
   {path: '/service/complete', component: Ad},
+  {path: '/serviceyt/complete', component: Ad},
 ];
 
 const router = new VueRouter({
