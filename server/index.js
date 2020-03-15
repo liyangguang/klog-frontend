@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 
 const STATIC_FOLDER = 'dist';
 
-httpServer = () => {
+const httpServer = () => {
   const httpApp = express();
   httpApp.use(bodyParser.json());
   httpApp.use(bodyParser.urlencoded({ extended: false }));

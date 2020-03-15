@@ -14,6 +14,7 @@ import UploadDemo from './embededViews/UploadDemo.vue';
 import EmbededCourses from './embededViews/Courses.vue';
 import EmbededStudents from './embededViews/Students.vue';
 import Ad from './components/Ad.vue';
+import Rtc from './webrtc/demo.vue';
 
 Vue.use(VueRouter);
 
@@ -57,6 +58,7 @@ const routes = [
   {path: '/chat/complete', component: Ad},
   {path: '/service/complete', component: Ad},
   {path: '/serviceyt/complete', component: Ad},
+  {path: '/rtc', component: Rtc},
 ];
 
 const router = new VueRouter({
